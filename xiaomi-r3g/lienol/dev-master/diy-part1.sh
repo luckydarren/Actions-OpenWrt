@@ -12,7 +12,7 @@
 #sed -i '$a src-git helloworld https://github.com/fw876/helloworld' feeds.conf.default
 
 # Lienol/openwrt-package include passwall
-sed -i '$a src-git lienol2 https://github.com/luckydarren/lienol-openwrt-package' feeds.conf.default
+#sed -i '$a src-git lienol2 https://github.com/luckydarren/lienol-openwrt-package' feeds.conf.default
 #sed -i '$a src-git lienol2 https://github.com/TinyTitanPro/lienol-openwrt-package.git' feeds.conf.default
 #sed -i '$a src-git lienol2 https://github.com/Lancenas/lienol-openwrt-package.git' feeds.conf.default
 
