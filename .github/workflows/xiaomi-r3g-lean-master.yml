@@ -42,7 +42,7 @@ env:
   UPLOAD_PACKAGES: true
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
-  UPLOAD_WETRANSFER: false
+  UPLOAD_WETRANSFER: true
   UPLOAD_RELEASE: false
   TZ: Asia/Shanghai
 
@@ -66,21 +66,18 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
-
     - name: Clone source code
       working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
-
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
@@ -94,7 +91,6 @@ jobs:
         chmod +x $DIY_P2_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
-
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
       if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
@@ -110,7 +106,6 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-
     - name: Compile the firmware
       id: compile
       run: |
@@ -125,48 +120,38 @@ jobs:
     - name: Check space usage
       if: (!cancelled())
       run: df -hT
-
-    - name: Get firmware path
-      id: get_firmware_path
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd openwrt/bin/targets/*/*
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "::set-output name=status::success"
-
+              
     - name: Upload packages directory
       uses: actions/upload-artifact@main
-      if: steps.get_firmware_path.outputs.status == 'success' && env.UPLOAD_PACKAGES == 'true' && !cancelled()
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_PACKAGES == 'true' && !cancelled()
       with:
         name: OpenWrt_packages${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: ${{ env.FIRMWARE }}/packages
+        path: openwrt/bin/packages
         
     - name: Upload packages to cowtransfer
       id: packages_cowtransfer
-      if: steps.get_firmware_path.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && env.UPLOAD_PACKAGES == 'true' && !cancelled()
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && env.UPLOAD_PACKAGES == 'true' && !cancelled()
       run: |
-        cd ${FIRMWARE}
         curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress packages 2>&1 | tee cowtransfer_packages.log
+        ./transfer cow --block 2621440 -s -p 64 --no-progress openwrt/bin/packages 2>&1 | tee cowtransfer_packages.log
         echo "::warning file=packages_cowtransfer.com::$(cat cowtransfer_packages.log | grep https)"
         echo "::set-output name=url::$(cat cowtransfer_packages.log | grep https | cut -f3 -d" ")"
         
     - name: Upload packages to WeTransfer
       id: packages_wetransfer
-      if: steps.get_firmware_path.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && env.UPLOAD_PACKAGES == 'true' && !cancelled()
-      run: |
-        cd ${FIRMWARE}
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && env.UPLOAD_PACKAGES == 'true' && !cancelled()
+      run: |        
         curl -fsSL git.io/file-transfer | sh
-        ./transfer wet -s -p 16 --no-progress packages 2>&1 | tee wetransfer_packages.log
+        ./transfer wet -s -p 16 --no-progress openwrt/bin/packages 2>&1 | tee wetransfer_packages.log
         echo "::warning file=packages_wetransfer.com::$(cat wetransfer_packages.log | grep https)"
         echo "::set-output name=url::$(cat wetransfer_packages.log | grep https | cut -f3 -d" ")"
-
     - name: Organize files
       id: organize
-      if: steps.get_firmware_path.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
-        cd ${FIRMWARE}
+        cd openwrt/bin/targets/*/*
         rm -rf packages
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "::set-output name=status::success"
         
     - name: Upload firmware directory
