@@ -21,7 +21,7 @@ sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
 sed -i '$a src-git xiaorouji https://github.com/xiaorouji/openwrt-passwall' feeds.conf.default
 
 #jerrykuku
-sed -i '$a src-git jerrykuku https://github.com/jerrykuku/luci-app-vssr' feeds.conf.default
+#sed -i '$a src-git jerrykuku https://github.com/jerrykuku/luci-app-vssr' feeds.conf.default
 
 #Support MIPS FPU EMULATOR
 #sed -i '$a CONFIG_GENERIC_PINCONF=y' target/linux/ramips/mt7621/config-4.14
