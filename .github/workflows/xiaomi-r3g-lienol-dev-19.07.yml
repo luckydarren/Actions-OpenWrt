@@ -17,8 +17,8 @@ on:
       - master
     paths:
       - 'xiaomi-r3g/lienol/dev-19.07/.config'
-  schedule:
-    - cron: 0 2 * * 3
+#   schedule:
+#     - cron: 0 2 * * 3
     #每周三10点编译
   watch:
     types: started
