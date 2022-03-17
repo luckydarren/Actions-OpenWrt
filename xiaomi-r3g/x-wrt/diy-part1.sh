@@ -30,6 +30,7 @@
 #sed -i '/CONFIG_MIPS_CBPF_JIT=y/d' target/linux/ramips/mt7621/config-4.14
 
 #lean
+echo 'src-git lean https://github.com/coolsnowwolf/lede' >>feeds.conf.default
 echo 'src-git lean_packages https://github.com/coolsnowwolf/packages' >>feeds.conf.default
 echo 'src-git lean_luci https://github.com/coolsnowwolf/luci' >>feeds.conf.default
 #ssr-plus

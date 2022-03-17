@@ -9,7 +9,7 @@
 #
 # firmware path:openwrt/bin/targets,eg:openwrt/bin/targets/ramips/mt7621
 # packages path:openwrt/bin/packages,eg:openwrt/bin/packages/mipsel_24kc
-name: Build Lean's OpenWrt For xiaomi-r3g
+name: Build X-Wrt For xiaomi-r3g
 
 on:
   repository_dispatch:
@@ -19,10 +19,10 @@ on:
         description: 'SSH connection to Actions'
         required: false
         default: 'false'
-      # tag:
-      #   description: 'Tag for X-Wrt'
-      #   required: true
-      #   default: '21.10_b202201172351'
+      tag:
+        description: 'Tag for X-Wrt'
+        required: true
+        default: '21.10_b202201172351'
 
 env:
   REPO_URL: https://github.com/x-wrt/x-wrt
@@ -67,7 +67,7 @@ jobs:
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
-        git checkout -f 21.10_b202201172351
+        git checkout -f ${{ github.event.inputs.tag }}
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: Load custom feeds
