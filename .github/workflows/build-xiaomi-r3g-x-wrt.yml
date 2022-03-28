@@ -22,7 +22,7 @@ on:
       tag:
         description: 'Tag for X-Wrt'
         required: true
-        default: '21.10_b202201172351'
+        default: '22.02_b202203240321'
 
 env:
   REPO_URL: https://github.com/x-wrt/x-wrt
