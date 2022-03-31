@@ -116,15 +116,6 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
-    - name: Zip packages and firmware directory
-      id: zip
-      if: steps.compile.outputs.status == 'success' && !cancelled()
-      run: |
-        cd openwrt/bin
-        zip -r packages.zip packages
-        zip -r firmware.zip targets
-        echo "::set-output name=status::success"
-
     - name: Upload packages to artifact
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_PACKAGES == 'true' && !cancelled()
@@ -174,6 +165,23 @@ jobs:
         ./transfer wet -s -p 16 --no-progress openwrt/bin/packages 2>&1 | tee wetransfer_packages.log
         echo "::warning file=wetransfer.com::$(cat wetransfer_packages.log | grep https)"
         echo "::set-output name=url::$(cat wetransfer_packages.log | grep https | cut -f3 -d" ")"
+        
+    - name: Organize files
+      id: organize
+      if: steps.compile.outputs.status == 'success' && !cancelled()
+      run: |
+        cd openwrt/bin/targets/*/*
+        zip -r firmware_packages.zip packages
+        rm -rf packages
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "::set-output name=status::success"
+
+    - name: Zip files
+      id: zip
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      run: |
+        zip -r ${FIRMWARE}/packages.zip openwrt/bin/packages
+        echo "::set-output name=status::success"
 
     - name: Generate release tag
       id: tag
@@ -195,9 +203,7 @@ jobs:
       with:
         tag_name: ${{ steps.tag.outputs.release_tag }}${{env.DEVICE_NAME}}
         body_path: release.txt
-        files: |
-          openwrt/bin/firmware.zip
-          openwrt/bin/packages.zip
+        files: ${{ env.FIRMWARE }}/*
 
     # - name: Delete workflow runs
     #   uses: GitRML/delete-workflow-runs@main
