@@ -14,11 +14,11 @@
 #sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
 
 # Add a feed source
-#Passwall
-echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
 #ssr-plus
+echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
+#passwall
 echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall' >>feeds.conf.default
-#Openclash
+#openclash
 echo 'src-git Openclash https://github.com/vernesong/OpenClash' >>feeds.conf.default
 #其他软件包源
 echo 'src-git freifunk https://github.com/freifunk/openwrt-packages.git' >>feeds.conf.default
