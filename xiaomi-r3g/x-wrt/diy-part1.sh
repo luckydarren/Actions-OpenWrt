@@ -8,4 +8,4 @@
 # Blog: https://p3terx.com
 #=============================================================
 
-echo 'src-git NueXini_Packages https://github.com/NueXini/NueXini_Packages.git' >>feeds.conf.default
+echo 'src-git-full NueXini_Packages https://github.com/NueXini/NueXini_Packages.git' >>feeds.conf.default
